@@ -107,7 +107,7 @@
 
     view.appendChild(el(`<h2>Storage</h2>`));
     const disks = el(`<div class="panel"><table><thead><tr>
-      <th>Name</th><th>Path</th><th>Total</th><th>Free</th><th>Used %</th>
+      <th>Name</th><th>Path</th><th class="num">Total</th><th class="num">Free</th><th class="num">Used %</th>
     </tr></thead><tbody></tbody></table></div>`);
     const dtbody = disks.querySelector("tbody");
     (data.disks || []).forEach((d) => {
@@ -126,7 +126,7 @@
     if (data.clusters && data.clusters.length) {
       view.appendChild(el(`<h2>Clusters</h2>`));
       const c = el(`<div class="panel"><table><thead><tr>
-        <th>Cluster</th><th>Host</th><th>Port</th><th>Shard</th><th>Replica</th><th>Local</th>
+        <th>Cluster</th><th>Host</th><th class="num">Port</th><th class="num">Shard</th><th class="num">Replica</th><th>Local</th>
       </tr></thead><tbody></tbody></table></div>`);
       const tb = c.querySelector("tbody");
       data.clusters.forEach((r) => {

@@ -133,7 +133,7 @@ th {
   background: var(--bg-elev-2);
 }
 tbody tr:hover { background: var(--bg-elev-2); }
-td.num { text-align: right; }
+.num { text-align: right; }
 td.code { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
 
 /* ---------- Buttons / Inputs ---------- */

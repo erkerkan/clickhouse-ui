@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in the dashboard is broken
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more concrete you can be, the faster it gets fixed.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+      placeholder: e.g. "The Tables tab shows 500 with ILLEGAL_AGGREGATION"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Repro steps
+      description: How can someone reproduce this?
+      placeholder: |
+        1. Mount the dashboard at /clickhouse against ClickHouse 24.x
+        2. Open the Tables tab
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: clickhouse-version
+    attributes:
+      label: ClickHouse version
+      placeholder: e.g. 25.3.4.11
+    validations:
+      required: true
+  - type: input
+    id: dotnet-version
+    attributes:
+      label: .NET version
+      placeholder: e.g. .NET 8.0.10
+    validations:
+      required: true
+  - type: input
+    id: package-version
+    attributes:
+      label: ClickHouseUI version
+      placeholder: e.g. 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Browser console errors, ASP.NET Core logs, or screenshots help a lot.
+      render: text

@@ -4,6 +4,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/ClickHouseUI.svg?style=flat-square)](https://www.nuget.org/packages/ClickHouseUI/)
 [![Downloads](https://img.shields.io/nuget/dt/ClickHouseUI.svg?style=flat-square)](https://www.nuget.org/packages/ClickHouseUI/)
+[![CI](https://img.shields.io/github/actions/workflow/status/erkerkan/clickhouse-ui/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/erkerkan/clickhouse-ui/actions/workflows/ci.yml)
 [![.NET](https://img.shields.io/badge/.NET-8.0-blueviolet?style=flat-square)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 

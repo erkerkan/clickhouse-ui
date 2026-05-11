@@ -9,6 +9,24 @@
 
 ---
 
+## Screenshots
+
+![Visual EXPLAIN](docs/screenshots/explain.png)
+*Visual EXPLAIN — paste any query and inspect the execution tree.*
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/overview.png" alt="Overview"><br><sub><b>Overview</b> — server version, uptime, disks, clusters.</sub></td>
+<td width="50%"><img src="docs/screenshots/metrics.png" alt="Live Metrics"><br><sub><b>Live Metrics</b> — 2-second polling from <code>system.metrics</code> / <code>events</code>.</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/tables.png" alt="Tables & Parts"><br><sub><b>Tables & Parts</b> — sizes, compression ratio, MergeTree parts.</sub></td>
+<td width="50%"><img src="docs/screenshots/slow-queries.png" alt="Slow Queries"><br><sub><b>Slow Queries</b> — top finished queries from <code>system.query_log</code>.</sub></td>
+</tr>
+</table>
+
+---
+
 ## Why
 
 ClickHouse ships with great system tables (`system.metrics`, `system.events`, `system.parts`, `system.query_log`...). The problem: opening `clickhouse-client` and running `SELECT * FROM system.parts WHERE active` is not how you debug a production cluster at 3 AM.

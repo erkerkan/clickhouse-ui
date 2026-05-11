@@ -9,6 +9,8 @@ namespace ClickHouseUI;
 
 internal sealed class ClickHouseDashboardMiddleware
 {
+    private const string IndexFileName = "index.html";
+
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
         WriteIndented = false
@@ -28,22 +30,26 @@ internal sealed class ClickHouseDashboardMiddleware
         _next = next;
         _options = options;
         _basePath = basePath.TrimEnd('/');
-        _fileProvider = new EmbeddedFileProvider(
-            typeof(ClickHouseDashboardMiddleware).GetTypeInfo().Assembly,
-            "ClickHouseUI.wwwroot");
+
+        // Resolve the wwwroot namespace from the assembly name rather than hard
+        // coding it, so the package keeps working if it's renamed or forked.
+        var asm = typeof(ClickHouseDashboardMiddleware).GetTypeInfo().Assembly;
+        var rootNamespace = (asm.GetName().Name ?? nameof(ClickHouseUI)) + ".wwwroot";
+        _fileProvider = new EmbeddedFileProvider(asm, rootNamespace);
+
         _queryService = new ClickHouseQueryService(options.ConnectionString);
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? string.Empty;
-        if (!path.StartsWith(_basePath, StringComparison.OrdinalIgnoreCase))
+        if (!IsUnderBasePath(path))
         {
             await _next(context).ConfigureAwait(false);
             return;
         }
 
-        if (!_options.AllowAnonymous && _options.Authorize is { } predicate && !predicate(context))
+        if (!IsAuthorized(context))
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return;
@@ -61,24 +67,36 @@ internal sealed class ClickHouseDashboardMiddleware
         await ServeStaticAsync(context, subPath).ConfigureAwait(false);
     }
 
+    // /clickhouse should match /clickhouse and /clickhouse/* but NOT /clickhouse-other.
+    private bool IsUnderBasePath(string path)
+    {
+        if (!path.StartsWith(_basePath, StringComparison.OrdinalIgnoreCase)) return false;
+        return path.Length == _basePath.Length || path[_basePath.Length] == '/';
+    }
+
+    private bool IsAuthorized(HttpContext context)
+    {
+        if (_options.AllowAnonymous) return true;
+        if (_options.Authorize is { } predicate) return predicate(context);
+        // Sensible default when AllowAnonymous=false but no predicate was supplied:
+        // require an authenticated user. Avoids the "locked out forever" foot-gun.
+        return context.User.Identity?.IsAuthenticated == true;
+    }
+
     private async Task HandleApiAsync(HttpContext context, string subPath)
     {
+        if (!DashboardEndpoints.All.TryGetValue(subPath, out var endpoint))
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return;
+        }
+
         try
         {
-            object? payload = subPath.ToLowerInvariant() switch
-            {
-                "/api/overview"      => await OverviewApi.GetAsync(_queryService, _options, context.RequestAborted).ConfigureAwait(false),
-                "/api/metrics"       => await MetricsApi.GetAsync(_queryService, context.RequestAborted).ConfigureAwait(false),
-                "/api/tables"        => await TablesApi.GetAsync(_queryService, context.RequestAborted).ConfigureAwait(false),
-                "/api/parts"         => await TablesApi.GetPartsAsync(_queryService, context.Request.Query["database"], context.Request.Query["table"], context.RequestAborted).ConfigureAwait(false),
-                "/api/slow-queries"  => await QueriesApi.GetSlowAsync(_queryService, _options, context.RequestAborted).ConfigureAwait(false),
-                "/api/explain"       => await ExplainApi.PostAsync(_queryService, context).ConfigureAwait(false),
-                _ => null
-            };
-
+            var payload = await endpoint(context, _queryService, _options, context.RequestAborted).ConfigureAwait(false);
             if (payload is null)
             {
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                context.Response.StatusCode = StatusCodes.Status204NoContent;
                 return;
             }
 
@@ -87,33 +105,41 @@ internal sealed class ClickHouseDashboardMiddleware
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
-            // Client disconnected.
+            // Client disconnected mid-request; nothing to report.
         }
         catch (Exception ex)
         {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            context.Response.ContentType = "application/json; charset=utf-8";
-            await JsonSerializer.SerializeAsync(context.Response.Body, new
-            {
-                error = ex.GetType().Name,
-                message = ex.Message
-            }, JsonOptions).ConfigureAwait(false);
+            await WriteJsonErrorAsync(context, ex).ConfigureAwait(false);
         }
+    }
+
+    private static async Task WriteJsonErrorAsync(HttpContext context, Exception ex)
+    {
+        // Once the response has started flushing we can't change status code or
+        // headers without corrupting the stream. Bail out and let the host log.
+        if (context.Response.HasStarted) return;
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json; charset=utf-8";
+        await JsonSerializer.SerializeAsync(context.Response.Body, new
+        {
+            error = ex.GetType().Name,
+            message = ex.Message
+        }, JsonOptions).ConfigureAwait(false);
     }
 
     private async Task ServeStaticAsync(HttpContext context, string subPath)
     {
         // The dashboard is a single-page app; serve index.html for the root
-        // and for any unknown path that doesn't have a file extension.
-        var resourcePath = subPath == "/" ? "/index.html" : subPath;
+        // and as a fallback for any unknown path that has no file extension.
+        var resourcePath = subPath == "/" ? "/" + IndexFileName : subPath;
         var fileInfo = _fileProvider.GetFileInfo(resourcePath);
 
         if (!fileInfo.Exists)
         {
-            // SPA fallback
             if (!Path.HasExtension(resourcePath))
             {
-                fileInfo = _fileProvider.GetFileInfo("/index.html");
+                fileInfo = _fileProvider.GetFileInfo("/" + IndexFileName);
             }
             if (!fileInfo.Exists)
             {
@@ -124,21 +150,26 @@ internal sealed class ClickHouseDashboardMiddleware
 
         context.Response.ContentType = GetContentType(fileInfo.Name);
 
-        // Inject runtime configuration into index.html so the frontend knows its
-        // base path and title without needing a server-rendered template engine.
-        if (fileInfo.Name.Equals("index.html", StringComparison.OrdinalIgnoreCase))
+        if (fileInfo.Name.Equals(IndexFileName, StringComparison.OrdinalIgnoreCase))
         {
-            using var reader = new StreamReader(fileInfo.CreateReadStream());
-            var html = await reader.ReadToEndAsync().ConfigureAwait(false);
-            html = html
-                .Replace("__BASE_PATH__", _basePath)
-                .Replace("__DASHBOARD_TITLE__", System.Net.WebUtility.HtmlEncode(_options.Title));
-            await context.Response.WriteAsync(html, context.RequestAborted).ConfigureAwait(false);
+            await ServeIndexHtmlAsync(context, fileInfo).ConfigureAwait(false);
             return;
         }
 
         await using var stream = fileInfo.CreateReadStream();
         await stream.CopyToAsync(context.Response.Body, context.RequestAborted).ConfigureAwait(false);
+    }
+
+    // Inject runtime configuration into index.html so the frontend knows its
+    // mount path and title without needing a server-side template engine.
+    private async Task ServeIndexHtmlAsync(HttpContext context, IFileInfo fileInfo)
+    {
+        using var reader = new StreamReader(fileInfo.CreateReadStream());
+        var html = await reader.ReadToEndAsync().ConfigureAwait(false);
+        html = html
+            .Replace("__BASE_PATH__", _basePath)
+            .Replace("__DASHBOARD_TITLE__", System.Net.WebUtility.HtmlEncode(_options.Title));
+        await context.Response.WriteAsync(html, context.RequestAborted).ConfigureAwait(false);
     }
 
     private static string GetContentType(string fileName) => Path.GetExtension(fileName).ToLowerInvariant() switch
@@ -150,6 +181,6 @@ internal sealed class ClickHouseDashboardMiddleware
         ".ico"  => "image/x-icon",
         ".png"  => "image/png",
         ".json" => "application/json; charset=utf-8",
-        _ => "application/octet-stream"
+        _       => "application/octet-stream"
     };
 }

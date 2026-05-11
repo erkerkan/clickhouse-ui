@@ -327,9 +327,9 @@
         const tr = el(`<tr>
           <td>${escapeHtml(r.database)}</td>
           <td><strong>${escapeHtml(r.table)}</strong></td>
-          <td class="num">${fmtNumber(r.rows)}</td>
+          <td class="num">${fmtNumber(r.total_rows)}</td>
           <td class="num">${escapeHtml(r.size || "-")}</td>
-          <td class="num">${fmtNumber(r.parts)}</td>
+          <td class="num">${fmtNumber(r.parts_count)}</td>
           <td class="num">${r.compression_ratio ? r.compression_ratio + "x" : "-"}</td>
           <td class="muted">${escapeHtml(r.last_modified || "-")}</td>
           <td><button class="ghost" data-db="${escapeHtml(r.database)}" data-tbl="${escapeHtml(r.table)}">Parts</button></td>

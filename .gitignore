@@ -9,6 +9,10 @@ obj/
 ## Rider / VS
 .vs/
 .idea/
+**/Properties/launchSettings.json
+
+## Local-only sample config overrides (keep secrets/IPs out of the repo)
+samples/**/appsettings.Local.json
 
 ## NuGet
 *.nupkg

@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Pack
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build (Release)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Pack
+        run: dotnet pack src/ClickHouseUI/ClickHouseUI.csproj --configuration Release --no-build --output artifacts
+
+      - name: Verify embedded assets are present in the DLL
+        # Sanity check: if someone removes the EmbeddedResource include, the
+        # dashboard will silently 404. Fail the build instead.
+        run: |
+          set -e
+          DLL="src/ClickHouseUI/bin/Release/net8.0/ClickHouseUI.dll"
+          for name in index.html styles.css app.js chart.umd.min.js; do
+            if ! strings "$DLL" | grep -q "ClickHouseUI.wwwroot.$name"; then
+              echo "::error::Embedded resource ClickHouseUI.wwwroot.$name is missing from $DLL"
+              exit 1
+            fi
+          done
+          echo "All embedded resources present."
+
+      - name: Upload NuGet artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: artifacts/*.nupkg
+          retention-days: 30

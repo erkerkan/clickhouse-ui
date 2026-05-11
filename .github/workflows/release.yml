@@ -1,0 +1,60 @@
+name: Release
+
+# Tag-driven release: push a tag like v0.1.1 and this workflow will build,
+# pack, attach the .nupkg to the GitHub release, and publish to NuGet.org.
+#
+# Required secrets:
+#   NUGET_API_KEY  - your NuGet.org push key
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Derive version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: dotnet build --configuration Release /p:Version=${{ steps.version.outputs.version }}
+
+      - name: Pack
+        run: |
+          dotnet pack src/ClickHouseUI/ClickHouseUI.csproj \
+            --configuration Release --no-build \
+            --output artifacts \
+            /p:Version=${{ steps.version.outputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+
+      - name: Push to NuGet.org
+        if: ${{ env.NUGET_API_KEY != '' }}
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push artifacts/*.nupkg \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

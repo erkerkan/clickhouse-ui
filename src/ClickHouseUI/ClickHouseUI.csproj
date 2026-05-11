@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <!-- NuGet package metadata -->
+    <PackageId>ClickHouseUI</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Murat Erkara</Authors>
+    <Company>ClickHouseUI</Company>
+    <Description>Drop-in ASP.NET Core dashboard for ClickHouse. Add app.UseClickHouseDashboard() to your pipeline to get live metrics, table explorer, slow queries and visual EXPLAIN plans.</Description>
+    <PackageTags>clickhouse;dashboard;monitoring;aspnetcore;middleware;metrics;observability</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/erkerkan/clickhouse-ui</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/erkerkan/clickhouse-ui.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>true</IncludeSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="ClickHouse.Client" Version="7.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Embed all dashboard static assets directly into the assembly -->
+    <EmbeddedResource Include="wwwroot\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

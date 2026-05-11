@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>__DASHBOARD_TITLE__</title>
+  <link rel="stylesheet" href="__BASE_PATH__/styles.css" />
+  <script>window.__CH_UI__ = { basePath: "__BASE_PATH__", title: "__DASHBOARD_TITLE__" };</script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">CH</div>
+      <div>
+        <div class="brand-title">__DASHBOARD_TITLE__</div>
+        <div class="brand-sub">ClickHouseUI</div>
+      </div>
+    </div>
+    <nav>
+      <a href="#/overview"      data-route="overview"      class="nav active">Overview</a>
+      <a href="#/metrics"       data-route="metrics"       class="nav">Live Metrics</a>
+      <a href="#/tables"        data-route="tables"        class="nav">Tables &amp; Parts</a>
+      <a href="#/slow-queries"  data-route="slow-queries"  class="nav">Slow Queries</a>
+      <a href="#/explain"       data-route="explain"       class="nav">Visual EXPLAIN</a>
+    </nav>
+    <div class="footer">
+      <span id="status-dot" class="dot dot-ok"></span>
+      <span id="status-text">connected</span>
+    </div>
+  </aside>
+
+  <main id="view">
+    <div class="loading">Loading...</div>
+  </main>
+
+  <script src="__BASE_PATH__/chart.umd.min.js"></script>
+  <script src="__BASE_PATH__/app.js"></script>
+</body>
+</html>

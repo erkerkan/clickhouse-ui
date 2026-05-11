@@ -1,0 +1,20 @@
+## Build
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider / VS
+.vs/
+.idea/
+
+## NuGet
+*.nupkg
+*.snupkg
+artifacts/
+
+## OS
+.DS_Store
+Thumbs.db

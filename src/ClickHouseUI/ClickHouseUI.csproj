@@ -8,7 +8,7 @@
 
     <!-- NuGet package metadata -->
     <PackageId>ClickHouseUI</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Murat Erkara</Authors>
     <Company>ClickHouseUI</Company>
     <Description>Drop-in ASP.NET Core dashboard for ClickHouse. Add app.UseClickHouseDashboard() to your pipeline to get live metrics, table explorer, slow queries and visual EXPLAIN plans.</Description>

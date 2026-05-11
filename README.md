@@ -6,25 +6,31 @@
 [![Downloads](https://img.shields.io/nuget/dt/ClickHouseUI.svg?style=flat-square)](https://www.nuget.org/packages/ClickHouseUI/)
 [![CI](https://img.shields.io/github/actions/workflow/status/erkerkan/clickhouse-ui/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/erkerkan/clickhouse-ui/actions/workflows/ci.yml)
 [![.NET](https://img.shields.io/badge/.NET-8.0-blueviolet?style=flat-square)](https://dotnet.microsoft.com/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](https://github.com/erkerkan/clickhouse-ui/blob/main/LICENSE)
 
 ---
 
 ## Screenshots
 
-![Visual EXPLAIN](docs/screenshots/explain.png)
+![Visual EXPLAIN](https://raw.githubusercontent.com/erkerkan/clickhouse-ui/main/docs/screenshots/explain.png)
+
 *Visual EXPLAIN — paste any query and inspect the execution tree.*
 
-<table>
-<tr>
-<td width="50%"><img src="docs/screenshots/overview.png" alt="Overview"><br><sub><b>Overview</b> — server version, uptime, disks, clusters.</sub></td>
-<td width="50%"><img src="docs/screenshots/metrics.png" alt="Live Metrics"><br><sub><b>Live Metrics</b> — 2-second polling from <code>system.metrics</code> / <code>events</code>.</sub></td>
-</tr>
-<tr>
-<td width="50%"><img src="docs/screenshots/tables.png" alt="Tables & Parts"><br><sub><b>Tables & Parts</b> — sizes, compression ratio, MergeTree parts.</sub></td>
-<td width="50%"><img src="docs/screenshots/slow-queries.png" alt="Slow Queries"><br><sub><b>Slow Queries</b> — top finished queries from <code>system.query_log</code>.</sub></td>
-</tr>
-</table>
+![Overview](https://raw.githubusercontent.com/erkerkan/clickhouse-ui/main/docs/screenshots/overview.png)
+
+*Overview — server version, uptime, disks, clusters.*
+
+![Live Metrics](https://raw.githubusercontent.com/erkerkan/clickhouse-ui/main/docs/screenshots/metrics.png)
+
+*Live Metrics — 2-second polling from `system.metrics` / `system.events`.*
+
+![Tables & Parts](https://raw.githubusercontent.com/erkerkan/clickhouse-ui/main/docs/screenshots/tables.png)
+
+*Tables & Parts — sizes, compression ratio, MergeTree parts.*
+
+![Slow Queries](https://raw.githubusercontent.com/erkerkan/clickhouse-ui/main/docs/screenshots/slow-queries.png)
+
+*Slow Queries — top finished queries from `system.query_log`.*
 
 ---
 
@@ -148,4 +154,4 @@ Then open `http://localhost:5188/clickhouse`. The sample app reads the connectio
 
 ## License
 
-[MIT](LICENSE) © Murat Erkara
+[MIT](https://github.com/erkerkan/clickhouse-ui/blob/main/LICENSE) © Murat Erkara

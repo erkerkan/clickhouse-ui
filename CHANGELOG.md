@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file. The format is l
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-05-11
+
+### Fixed
+
+- README rendering on NuGet.org: screenshots and license badge use absolute `raw.githubusercontent.com` URLs so they render correctly inside the package details page. The HTML `<table>` grid was replaced with plain Markdown for the same reason.
+
+### Notes
+
+No code changes versus 0.1.0 — this is a docs-only release. The middleware and frontend are byte-identical.
+
 ## [0.1.0] — 2026-05-11
 
 ### Added
@@ -29,5 +39,6 @@ All notable changes to this project are documented in this file. The format is l
 - Dashboard authorization defaults: when `AllowAnonymous=false` and no predicate is supplied, the middleware now requires an authenticated user instead of returning 403 for everyone.
 - Base-path matching no longer leaks `/clickhouse-other` into `/clickhouse`.
 
-[Unreleased]: https://github.com/erkerkan/clickhouse-ui/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/erkerkan/clickhouse-ui/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/erkerkan/clickhouse-ui/releases/tag/v0.1.1
 [0.1.0]: https://github.com/erkerkan/clickhouse-ui/releases/tag/v0.1.0
